@@ -14,7 +14,7 @@ local ticker
 local paused
 
 local function Serialize(instanceId, x, y)
-	if not instanceId then
+	if not (instanceId and x and y) then
 		return GONE
 	end
 
