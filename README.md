@@ -4,6 +4,8 @@ Shows your friends on the world map and the minimap, as long as they run FriendM
 
 FriendMap finds out on its own which of your online friends run it. There is nothing to set up.
 
+Friends in your party or raid get no pin, because the game already shows them.
+
 ## Blocking
 
 Type `/friendmap` to open the settings and pick a friend under Block friend. Only character friends

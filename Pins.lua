@@ -55,6 +55,11 @@ local function SetClassColor(pin, classFile)
 end
 
 function ns:UpdatePin(name, instanceId, x, y)
+	if UnitInParty(name) or UnitInRaid(name) then
+		ns:RemovePin(name)
+		return
+	end
+
 	local friend = ns:GetFriend(name)
 	local worldPin = worldPins[name]
 	local minimapPin = minimapPins[name]
