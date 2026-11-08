@@ -46,6 +46,12 @@ ns:RegisterSettings("FriendMapDB", {
 		default = false,
 	},
 	{
+		key = "minimapPins",
+		type = "toggle",
+		title = "Show on minimap",
+		default = true,
+	},
+	{
 		key = "pinSize",
 		type = "slider",
 		title = "Pin size",

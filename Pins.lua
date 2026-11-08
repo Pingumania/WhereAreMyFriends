@@ -62,22 +62,27 @@ function ns:UpdatePin(name, instanceId, x, y)
 
 	local friend = ns:GetFriend(name)
 	local worldPin = worldPins[name]
-	local minimapPin = minimapPins[name]
 
 	if not worldPin then
 		worldPin = CreatePin(name)
 		worldPins[name] = worldPin
 	end
 
+	SetClassColor(worldPin, friend and friend.classFile)
+	Pins:AddWorldMapIconWorld(ns, worldPin, instanceId, x, y, ns:GetOption("continentPins") and HBD_PINS_WORLDMAP_SHOW_CONTINENT or nil)
+
+	if not ns:GetOption("minimapPins") then
+		return
+	end
+
+	local minimapPin = minimapPins[name]
+
 	if not minimapPin then
 		minimapPin = CreatePin(name)
 		minimapPins[name] = minimapPin
 	end
 
-	SetClassColor(worldPin, friend and friend.classFile)
 	SetClassColor(minimapPin, friend and friend.classFile)
-
-	Pins:AddWorldMapIconWorld(ns, worldPin, instanceId, x, y, ns:GetOption("continentPins") and HBD_PINS_WORLDMAP_SHOW_CONTINENT or nil)
 	Pins:AddMinimapIconWorld(ns, minimapPin, instanceId, x, y)
 end
 
@@ -100,15 +105,27 @@ function ns:RemoveAllPins()
 end
 
 ns:RegisterOptionCallback("pinSize", function(value)
-	for name, worldPin in next, worldPins do
-		worldPin:SetSize(value, value)
-		minimapPins[name]:SetSize(value, value)
+	for _, pin in next, worldPins do
+		pin:SetSize(value, value)
+	end
+
+	for _, pin in next, minimapPins do
+		pin:SetSize(value, value)
 	end
 end)
 
 ns:RegisterOptionCallback("pinTexture", function(value)
-	for name, worldPin in next, worldPins do
-		SetPinTexture(worldPin.texture, value)
-		SetPinTexture(minimapPins[name].texture, value)
+	for _, pin in next, worldPins do
+		SetPinTexture(pin.texture, value)
+	end
+
+	for _, pin in next, minimapPins do
+		SetPinTexture(pin.texture, value)
+	end
+end)
+
+ns:RegisterOptionCallback("minimapPins", function(value)
+	if not value then
+		Pins:RemoveAllMinimapIcons(ns)
 	end
 end)
