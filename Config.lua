@@ -73,7 +73,7 @@ ns:RegisterSettings("FriendMapDB", {
 	{
 		type = "custom",
 		title = "Block friend",
-		tooltip = "Only character friends of your faction are listed.",
+		tooltip = "Only friends of your faction are listed. Battle.net friends must be online in this game.",
 		createControl = function(row)
 			local dropdown = ns:CreateDropdown(row, ns.GetBlockCandidates, nop, Block)
 			dropdown.Dropdown:SetDefaultText(NONE)

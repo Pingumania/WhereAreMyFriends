@@ -58,6 +58,36 @@ local function RefreshCharacterFriends()
 	end
 end
 
+local function GetGameAccountName(game)
+	if RegionalUniqueNamesEnabled() or not game.realmName then
+		return game.characterName
+	end
+
+	return Ambiguate(game.characterName .. "-" .. game.realmName:gsub("%s", ""), "none")
+end
+
+local function AddBattleNetFriends(list)
+	local game, name
+
+	for index = 1, BNGetNumFriends() or 0 do
+		for gameIndex = 1, C_BattleNet.GetFriendNumGameAccounts(index) or 0 do
+			game = C_BattleNet.GetFriendGameAccountInfo(index, gameIndex)
+
+			if game and game.isOnline and game.characterName and game.clientProgram == BNET_CLIENT_WOW and game.wowProjectID == WOW_PROJECT_ID and game.factionName == playerFaction then
+				name = GetGameAccountName(game)
+
+				if not FriendMapDB.blocked[name] then
+					list[name] = {
+						classFile = game.classFilename,
+						className = game.className,
+						level = game.characterLevel,
+					}
+				end
+			end
+		end
+	end
+end
+
 function ns:RefreshFriends()
 	if not playerFaction then
 		return
@@ -67,6 +97,7 @@ function ns:RefreshFriends()
 	wipe(friends)
 
 	RefreshCharacterFriends()
+	AddBattleNetFriends(friends)
 
 	for name in next, friends do
 		if not previous[name] then
@@ -90,16 +121,25 @@ function ns:PingFriends()
 end
 
 function ns:GetBlockCandidates()
+	local names = {}
 	local candidates = {}
 	local info
+
+	AddBattleNetFriends(names)
 
 	for index = 1, C_FriendList.GetNumFriends() or 0 do
 		info = C_FriendList.GetFriendInfoByIndex(index)
 
 		if IsCandidate(info) then
-			candidates[#candidates + 1] = {value = info.name, label = info.name}
+			names[info.name] = true
 		end
 	end
+
+	for name in next, names do
+		candidates[#candidates + 1] = {value = name, label = name}
+	end
+
+	table.sort(candidates, function(a, b) return a.value < b.value end)
 
 	return candidates
 end
@@ -144,6 +184,18 @@ function ns:OnLogin()
 end
 
 function ns:FRIENDLIST_UPDATE()
+	ns:RefreshFriends()
+end
+
+function ns:BN_FRIEND_INFO_CHANGED()
+	ns:RefreshFriends()
+end
+
+function ns:BN_FRIEND_ACCOUNT_ONLINE()
+	ns:RefreshFriends()
+end
+
+function ns:BN_FRIEND_ACCOUNT_OFFLINE()
 	ns:RefreshFriends()
 end
 
