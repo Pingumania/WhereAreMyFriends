@@ -8,6 +8,7 @@ local RESTRICTED_TYPES = {
 local MAX_RACE_ID = 100
 
 local friends = {}
+local testers = {}
 local previous = {}
 local raceFactions = {}
 local playerFaction
@@ -98,6 +99,12 @@ function ns:RefreshFriends()
 
 	RefreshCharacterFriends()
 	AddBattleNetFriends(friends)
+
+	local className, classFile = UnitClass("player")
+
+	for name in next, testers do
+		friends[name] = friends[name] or (name == UnitName("player") and {classFile = classFile, className = className, level = UnitLevel("player")}) or {}
+	end
 
 	for name in next, friends do
 		if not previous[name] then
@@ -210,5 +217,26 @@ function ns:ADDON_RESTRICTION_STATE_CHANGED(restrictionType, state)
 	elseif state == Enum.AddOnRestrictionState.Inactive then
 		ns:ResumeBroadcasting()
 		ns:PingFriends()
+	end
+end
+
+SLASH_FRIENDMAPTEST1 = "/fmtest"
+SlashCmdList.FRIENDMAPTEST = function(name)
+	name = strtrim(name)
+
+	if name == "" then
+		return
+	end
+
+	testers[name] = not testers[name] or nil
+	print("FriendMap test peer", name, testers[name] and "added" or "removed")
+	ns:RefreshFriends()
+
+	local hidden = next(testers) ~= nil
+
+	for provider in next, WorldMapFrame.dataProviders do
+		if provider.SetUnitPinSize then
+			provider:SetUnitPinSize("player", hidden and 0 or 27)
+		end
 	end
 end
