@@ -42,7 +42,7 @@ local function IsOtherFaction(englishRace)
 end
 
 local function IsCandidate(info)
-	if not info or FriendMapDB.blocked[info.name] then
+	if not info or WhereAreMyFriendsDB.blocked[info.name] then
 		return false
 	end
 
@@ -99,7 +99,7 @@ local function AddBattleNetFriends(list)
 			if IsReachable(game) then
 				name = GetGameAccountName(game)
 
-				if not FriendMapDB.blocked[name] then
+				if not WhereAreMyFriendsDB.blocked[name] then
 					SetFriend(list, name, game.classFilename, game.className, game.characterLevel)
 				end
 			end
@@ -176,23 +176,21 @@ function ns:BlockFriend(name)
 		ns:SendGone(name)
 	end
 
-	FriendMapDB.blocked[name] = true
+	WhereAreMyFriendsDB.blocked[name] = true
 	ns:RefreshFriends()
 end
 
 function ns:UnblockFriend(name)
-	FriendMapDB.blocked[name] = nil
+	WhereAreMyFriendsDB.blocked[name] = nil
 	ns:RefreshFriends()
 end
 
 function ns:OnLoad()
-	if not FriendMapDB then
-		_G.FriendMapDB = {}
+	if not WhereAreMyFriendsDB then
+		_G.WhereAreMyFriendsDB = {}
 	end
 
-	FriendMapDB.channel = nil
-	FriendMapDB.password = nil
-	FriendMapDB.blocked = FriendMapDB.blocked or {}
+	WhereAreMyFriendsDB.blocked = WhereAreMyFriendsDB.blocked or {}
 end
 
 function ns:OnLogin()

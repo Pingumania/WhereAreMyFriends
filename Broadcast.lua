@@ -3,7 +3,7 @@ local _, ns = ...
 local AceComm = LibStub("AceComm-3.0")
 local HBD = LibStub("HereBeDragons-2.0")
 
-local PREFIX = "FriendMap"
+local PREFIX = "WAMF"
 local TICK_INTERVAL = 2
 local HELLO = "hello"
 local ACK = "ack"

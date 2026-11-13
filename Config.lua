@@ -8,7 +8,7 @@ local blockedList
 local function GetBlockedEntries()
 	local entries = {}
 
-	for name in next, FriendMapDB.blocked do
+	for name in next, WhereAreMyFriendsDB.blocked do
 		entries[#entries + 1] = {key = name, label = name}
 	end
 
@@ -28,15 +28,15 @@ local function Unblock(name)
 end
 
 local function UnblockAll()
-	for name in next, FriendMapDB.blocked do
+	for name in next, WhereAreMyFriendsDB.blocked do
 		Unblock(name)
 	end
 end
 
-ns:RegisterSettings("FriendMapDB", {
+ns:RegisterSettings("WhereAreMyFriendsDB", {
 	{
 		type = "description",
-		title = "Friends who run FriendMap see each other on the map. Blocked friends never get your position, and you never see theirs.",
+		title = "Friends who run WhereAreMyFriends see each other on the map. Blocked friends never get your position, and you never see theirs.",
 	},
 	{
 		key = "continentPins",
@@ -99,4 +99,4 @@ ns:RegisterSettings("FriendMapDB", {
 	},
 })
 
-ns:RegisterSettingsSlash("/friendmap")
+ns:RegisterSettingsSlash("/wamf", "/wherearemyfriends")
