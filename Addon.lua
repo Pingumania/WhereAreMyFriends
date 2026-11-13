@@ -84,6 +84,11 @@ local function GetGameAccountName(game)
 	return Ambiguate(game.characterName .. "-" .. game.realmName:gsub("%s", ""), "none")
 end
 
+local function IsReachable(game)
+	return game and game.isOnline and game.characterName and game.clientProgram == BNET_CLIENT_WOW and game.wowProjectID == WOW_PROJECT_ID
+		and game.factionName == playerFaction and game.realmID and game.realmID > 0
+end
+
 local function AddBattleNetFriends(list)
 	local game, name
 
@@ -91,7 +96,7 @@ local function AddBattleNetFriends(list)
 		for gameIndex = 1, C_BattleNet.GetFriendNumGameAccounts(index) or 0 do
 			game = C_BattleNet.GetFriendGameAccountInfo(index, gameIndex)
 
-			if game and game.isOnline and game.characterName and game.clientProgram == BNET_CLIENT_WOW and game.wowProjectID == WOW_PROJECT_ID and game.factionName == playerFaction then
+			if IsReachable(game) then
 				name = GetGameAccountName(game)
 
 				if not FriendMapDB.blocked[name] then
