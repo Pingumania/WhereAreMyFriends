@@ -12,6 +12,7 @@ local GONE = "gone"
 local peers = {}
 local ticker
 local paused
+local lastMessage
 
 local function Serialize(instanceId, x, y)
 	if not (instanceId and x and y) then
@@ -40,6 +41,10 @@ end
 
 local function AddPeer(name)
 	peers[name] = true
+
+	if lastMessage then
+		Send(lastMessage, name)
+	end
 
 	ns:StartBroadcasting()
 end
@@ -70,6 +75,12 @@ function ns:Broadcast()
 	local x, y, instanceId = HBD:GetPlayerWorldPosition()
 	local message = Serialize(instanceId, x, y)
 
+	if message == lastMessage then
+		return
+	end
+
+	lastMessage = message
+
 	for name in next, peers do
 		Send(message, name)
 	end
@@ -90,6 +101,7 @@ function ns:StopBroadcasting()
 
 	ticker:Cancel()
 	ticker = nil
+	lastMessage = nil
 end
 
 function ns:PauseBroadcasting()
