@@ -6,6 +6,7 @@
 ## IconAtlas: crosshair_track_32
 ## Author: Pingumania
 ## Version: @project-version@
+## X-Curse-Project-ID: 1802899
 
 ## SavedVariables: WhereAreMyFriendsDB
 
