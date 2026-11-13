@@ -51,19 +51,27 @@ local function IsCandidate(info)
 	return not IsOtherFaction(englishRace), englishClass
 end
 
+local function SetFriend(list, name, classFile, className, level)
+	local friend = previous[name] or {}
+
+	friend.classFile = classFile
+	friend.className = className
+	friend.level = level
+	list[name] = friend
+end
+
 local function RefreshCharacterFriends()
 	local info, candidate, englishClass
 
 	for index = 1, C_FriendList.GetNumFriends() or 0 do
 		info = C_FriendList.GetFriendInfoByIndex(index)
-		candidate, englishClass = IsCandidate(info)
 
-		if candidate and info.connected then
-			friends[info.name] = {
-				classFile = englishClass,
-				className = info.className,
-				level = info.level,
-			}
+		if info and info.connected then
+			candidate, englishClass = IsCandidate(info)
+
+			if candidate then
+				SetFriend(friends, info.name, englishClass, info.className, info.level)
+			end
 		end
 	end
 end
@@ -87,11 +95,7 @@ local function AddBattleNetFriends(list)
 				name = GetGameAccountName(game)
 
 				if not FriendMapDB.blocked[name] then
-					list[name] = {
-						classFile = game.classFilename,
-						className = game.className,
-						level = game.characterLevel,
-					}
+					SetFriend(list, name, game.classFilename, game.className, game.characterLevel)
 				end
 			end
 		end
