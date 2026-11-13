@@ -97,6 +97,7 @@ function ns:PauseBroadcasting()
 		Send(GONE, name)
 	end
 
+	wipe(peers)
 	paused = true
 
 	ns:StopBroadcasting()
@@ -125,7 +126,7 @@ function ns:OnCommReceived(prefix, message, distribution, sender)
 	elseif message == ACK then
 		AddPeer(sender)
 	elseif message == GONE then
-		ns:RemovePin(sender)
+		ns:RemovePeer(sender)
 	else
 		local instanceId, x, y = Deserialize(message)
 
