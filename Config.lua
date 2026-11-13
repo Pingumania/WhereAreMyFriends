@@ -43,7 +43,7 @@ ns:RegisterSettings("FriendMapDB", {
 		type = "toggle",
 		title = "Show on continent map",
 		tooltip = "Also show pins when the world map shows a whole continent.",
-		default = false,
+		default = true,
 	},
 	{
 		key = "minimapPins",
@@ -55,7 +55,7 @@ ns:RegisterSettings("FriendMapDB", {
 		key = "pinSize",
 		type = "slider",
 		title = "Pin size",
-		default = 20,
+		default = 12,
 		minValue = 8,
 		maxValue = 32,
 	},
