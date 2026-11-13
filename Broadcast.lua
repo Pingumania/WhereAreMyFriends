@@ -31,6 +31,10 @@ local function Deserialize(message)
 end
 
 local function Send(message, name)
+	if paused then
+		return
+	end
+
 	AceComm:SendCommMessage(PREFIX, message, "WHISPER", name)
 end
 

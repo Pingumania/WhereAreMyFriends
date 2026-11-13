@@ -25,6 +25,16 @@ local function CacheRaceFactions()
 	end
 end
 
+local function IsRestricted()
+	for restrictionType in next, RESTRICTED_TYPES do
+		if C_RestrictedActions.GetAddOnRestrictionState(restrictionType) ~= Enum.AddOnRestrictionState.Inactive then
+			return true
+		end
+	end
+
+	return false
+end
+
 local function IsOtherFaction(englishRace)
 	local faction = raceFactions[englishRace]
 
@@ -180,6 +190,11 @@ function ns:OnLogin()
 	playerFaction = UnitFactionGroup("player")
 
 	CacheRaceFactions()
+
+	if IsRestricted() then
+		ns:PauseBroadcasting()
+	end
+
 	ns:RefreshFriends()
 end
 
@@ -207,7 +222,7 @@ function ns:ADDON_RESTRICTION_STATE_CHANGED(restrictionType, state)
 	if state == Enum.AddOnRestrictionState.Activating then
 		ns:PauseBroadcasting()
 		ns:RemoveAllPins()
-	elseif state == Enum.AddOnRestrictionState.Inactive then
+	elseif state == Enum.AddOnRestrictionState.Inactive and not IsRestricted() then
 		ns:ResumeBroadcasting()
 		ns:PingFriends()
 	end
