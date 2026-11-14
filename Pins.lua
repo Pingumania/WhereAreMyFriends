@@ -69,7 +69,7 @@ function ns:UpdatePin(name, instanceId, x, y)
 	end
 
 	SetClassColor(worldPin, friend and friend.classFile)
-	Pins:AddWorldMapIconWorld(ns, worldPin, instanceId, x, y, ns:GetOption("continentPins") and HBD_PINS_WORLDMAP_SHOW_CONTINENT or nil)
+	Pins:AddWorldMapIconWorld(ns, worldPin, instanceId, x, y, ns:GetOption("continentPins") and HBD_PINS_WORLDMAP_SHOW_WORLD or nil)
 
 	if not ns:GetOption("minimapPins") then
 		return

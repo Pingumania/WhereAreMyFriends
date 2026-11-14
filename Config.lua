@@ -41,8 +41,8 @@ ns:RegisterSettings("WhereAreMyFriendsDB", {
 	{
 		key = "continentPins",
 		type = "toggle",
-		title = "Show on continent map",
-		tooltip = "Also show pins when the world map shows a whole continent.",
+		title = "Show on continent and world map",
+		tooltip = "Also show pins when the world map shows a whole continent or all of Azeroth.",
 		default = true,
 	},
 	{
