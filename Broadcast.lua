@@ -140,13 +140,19 @@ function ns:OnCommReceived(prefix, message, distribution, sender)
 		AddPeer(sender)
 	elseif message == GONE then
 		ns:RemovePeer(sender)
-	elseif message == HIDE then
-		ns:RemovePin(sender)
 	else
-		local instanceId, x, y = Deserialize(message)
+		if not ns:IsPeer(sender) then
+			AddPeer(sender)
+		end
 
-		if instanceId then
-			ns:UpdatePin(sender, instanceId, x, y)
+		if message == HIDE then
+			ns:RemovePin(sender)
+		else
+			local instanceId, x, y = Deserialize(message)
+
+			if instanceId then
+				ns:UpdatePin(sender, instanceId, x, y)
+			end
 		end
 	end
 end
