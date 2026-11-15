@@ -8,6 +8,7 @@ local TICK_INTERVAL = 2
 local HELLO = "hello"
 local ACK = "ack"
 local GONE = "gone"
+local HIDE = "hide"
 
 local peers = {}
 local ticker
@@ -16,7 +17,7 @@ local lastMessage
 
 local function Serialize(instanceId, x, y)
 	if not (instanceId and x and y) then
-		return GONE
+		return HIDE
 	end
 
 	return string.format("%d:%.4f:%.4f", instanceId, x, y)
@@ -139,6 +140,8 @@ function ns:OnCommReceived(prefix, message, distribution, sender)
 		AddPeer(sender)
 	elseif message == GONE then
 		ns:RemovePeer(sender)
+	elseif message == HIDE then
+		ns:RemovePin(sender)
 	else
 		local instanceId, x, y = Deserialize(message)
 
