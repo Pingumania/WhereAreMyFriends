@@ -55,7 +55,7 @@ local function SetClassColor(pin, classFile)
 end
 
 function ns:UpdatePin(name, instanceId, x, y)
-	if UnitInParty(name) or UnitInRaid(name) then
+	if UnitInParty(name) or UnitInRaid(name) or (ns.guildMapLoaded and C_GuildInfo.MemberExistsByName(name)) then
 		ns:RemovePin(name)
 		return
 	end

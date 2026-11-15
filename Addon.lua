@@ -195,6 +195,7 @@ end
 
 function ns:OnLogin()
 	playerFaction = UnitFactionGroup("player")
+	ns.guildMapLoaded = C_AddOns.IsAddOnLoaded("GuildMap")
 
 	CacheRaceFactions()
 
