@@ -1,3 +1,9 @@
+### v4
+
+* Friends reliably reappear after dungeons and loading screens
+
+*****
+
 ### v3
 
 * Friends in your guild no longer show up twice when GuildMap is loaded

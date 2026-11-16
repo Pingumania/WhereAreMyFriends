@@ -5,6 +5,7 @@ local HBD = LibStub("HereBeDragons-2.0")
 
 local PREFIX = "WAMF"
 local TICK_INTERVAL = 2
+local HEARTBEAT_TICKS = 15
 local HELLO = "hello"
 local ACK = "ack"
 local GONE = "gone"
@@ -13,6 +14,7 @@ local HIDE = "hide"
 local peers = {}
 local ticker
 local restricted
+local ticks = 0
 local lastMessage
 
 local function Serialize(instanceId, x, y)
@@ -58,10 +60,6 @@ function ns:RemovePeer(name)
 	peers[name] = nil
 
 	ns:RemovePin(name)
-
-	if not next(peers) then
-		ns:StopBroadcasting()
-	end
 end
 
 function ns:Ping(name)
@@ -75,8 +73,10 @@ end
 function ns:Broadcast()
 	local x, y, instanceId = HBD:GetPlayerWorldPosition()
 	local message = Serialize(instanceId, x, y)
+	ticks = ticks + 1
+	local heartbeat = ticks >= HEARTBEAT_TICKS
 
-	if message == lastMessage then
+	if message == lastMessage and not heartbeat then
 		return
 	end
 
@@ -85,10 +85,15 @@ function ns:Broadcast()
 	for name in next, peers do
 		Send(message, name)
 	end
+
+	if heartbeat then
+		ticks = 0
+		ns:PingFriends()
+	end
 end
 
 function ns:StartBroadcasting()
-	if ticker or restricted or not next(peers) then
+	if ticker or restricted then
 		return
 	end
 
@@ -110,7 +115,6 @@ function ns:PauseBroadcasting()
 		Send(GONE, name)
 	end
 
-	wipe(peers)
 	ns:StopBroadcasting()
 end
 
