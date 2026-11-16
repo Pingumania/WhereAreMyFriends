@@ -12,7 +12,7 @@ local HIDE = "hide"
 
 local peers = {}
 local ticker
-local paused
+local restricted
 local lastMessage
 
 local function Serialize(instanceId, x, y)
@@ -33,7 +33,7 @@ local function Deserialize(message)
 end
 
 local function Send(message, name)
-	if paused then
+	if restricted then
 		return
 	end
 
@@ -88,7 +88,7 @@ function ns:Broadcast()
 end
 
 function ns:StartBroadcasting()
-	if ticker or paused or not next(peers) then
+	if ticker or restricted or not next(peers) then
 		return
 	end
 
@@ -111,25 +111,31 @@ function ns:PauseBroadcasting()
 	end
 
 	wipe(peers)
-	paused = true
-
 	ns:StopBroadcasting()
 end
 
-function ns:ResumeBroadcasting()
-	paused = nil
+function ns:SetRestricted(value)
+	if value then
+		ns:PauseBroadcasting()
+		ns:RemoveAllPins()
+	end
 
-	ns:StartBroadcasting()
+	restricted = value
+
+	if not value then
+		ns:StartBroadcasting()
+		ns:PingFriends()
+	end
 end
 
 function ns:OnCommReceived(prefix, message, distribution, sender)
-	if prefix ~= PREFIX or distribution ~= "WHISPER" or paused then
+	if prefix ~= PREFIX or distribution ~= "WHISPER" then
 		return
 	end
 
 	sender = Ambiguate(sender, "none")
 
-	if not ns:IsFriend(sender) then
+	if restricted or not ns:IsFriend(sender) then
 		return
 	end
 

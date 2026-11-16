@@ -27,7 +27,7 @@ end
 
 local function IsRestricted()
 	for restrictionType in next, RESTRICTED_TYPES do
-		if C_RestrictedActions.GetAddOnRestrictionState(restrictionType) ~= Enum.AddOnRestrictionState.Inactive then
+		if C_RestrictedActions.IsAddOnRestrictionActive(restrictionType) then
 			return true
 		end
 	end
@@ -198,11 +198,6 @@ function ns:OnLogin()
 	ns.guildMapLoaded = C_AddOns.IsAddOnLoaded("GuildMap")
 
 	CacheRaceFactions()
-
-	if IsRestricted() then
-		ns:PauseBroadcasting()
-	end
-
 	ns:RefreshFriends()
 end
 
@@ -222,16 +217,12 @@ function ns:BN_FRIEND_ACCOUNT_OFFLINE()
 	ns:RefreshFriends()
 end
 
-function ns:ADDON_RESTRICTION_STATE_CHANGED(restrictionType, state)
-	if not RESTRICTED_TYPES[restrictionType] then
-		return
-	end
+function ns:PLAYER_ENTERING_WORLD()
+	ns:SetRestricted(IsRestricted())
+end
 
-	if state == Enum.AddOnRestrictionState.Activating then
-		ns:PauseBroadcasting()
-		ns:RemoveAllPins()
-	elseif state == Enum.AddOnRestrictionState.Inactive and not IsRestricted() then
-		ns:ResumeBroadcasting()
-		ns:PingFriends()
+function ns:ADDON_RESTRICTION_STATE_CHANGED(restrictionType, state)
+	if RESTRICTED_TYPES[restrictionType] then
+		ns:SetRestricted(state == Enum.AddOnRestrictionState.Activating or IsRestricted())
 	end
 end
