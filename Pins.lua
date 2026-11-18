@@ -4,6 +4,7 @@ local Pins = LibStub("HereBeDragons-Pins-2.0")
 
 local worldPins = {}
 local minimapPins = {}
+local positions = {}
 
 local function OnEnter(self)
 	local friend = ns:GetFriend(self.unitName)
@@ -54,9 +55,26 @@ local function SetClassColor(pin, classFile)
 	end
 end
 
+local function HidePins(name)
+	local worldPin = worldPins[name]
+	local minimapPin = minimapPins[name]
+
+	if worldPin then
+		Pins:RemoveWorldMapIcon(ns, worldPin)
+	end
+
+	if minimapPin then
+		Pins:RemoveMinimapIcon(ns, minimapPin)
+	end
+end
+
 function ns:UpdatePin(name, instanceId, x, y)
+	local position = positions[name] or {}
+	position.instanceId, position.x, position.y = instanceId, x, y
+	positions[name] = position
+
 	if UnitInParty(name) or UnitInRaid(name) or (ns.guildMapLoaded and C_GuildInfo.MemberExistsByName(name)) then
-		ns:RemovePin(name)
+		HidePins(name)
 		return
 	end
 
@@ -87,21 +105,20 @@ function ns:UpdatePin(name, instanceId, x, y)
 end
 
 function ns:RemovePin(name)
-	local worldPin = worldPins[name]
-	local minimapPin = minimapPins[name]
-
-	if worldPin then
-		Pins:RemoveWorldMapIcon(ns, worldPin)
-	end
-
-	if minimapPin then
-		Pins:RemoveMinimapIcon(ns, minimapPin)
-	end
+	positions[name] = nil
+	HidePins(name)
 end
 
 function ns:RemoveAllPins()
+	wipe(positions)
 	Pins:RemoveAllWorldMapIcons(ns)
 	Pins:RemoveAllMinimapIcons(ns)
+end
+
+function ns:GROUP_ROSTER_UPDATE()
+	for name, position in next, positions do
+		ns:UpdatePin(name, position.instanceId, position.x, position.y)
+	end
 end
 
 ns:RegisterOptionCallback("pinSize", function(value)
