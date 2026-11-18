@@ -15,9 +15,9 @@ local playerFaction
 local function CacheRaceFactions()
 	local race, faction
 
-	for raceID = 1, MAX_RACE_ID do
-		race = C_CreatureInfo.GetRaceInfo(raceID)
-		faction = race and C_CreatureInfo.GetFactionInfo(raceID)
+	for raceId = 1, MAX_RACE_ID do
+		race = C_CreatureInfo.GetRaceInfo(raceId)
+		faction = race and C_CreatureInfo.GetFactionInfo(raceId)
 
 		if faction then
 			raceFactions[race.clientFileString] = faction.groupTag
@@ -46,9 +46,9 @@ local function IsCandidate(info)
 		return false
 	end
 
-	local _, englishClass, _, englishRace = GetPlayerInfoByGUID(info.guid)
+	local _, _, _, englishRace = GetPlayerInfoByGUID(info.guid)
 
-	return not IsOtherFaction(englishRace), englishClass
+	return not IsOtherFaction(englishRace)
 end
 
 local function SetFriend(list, name, classFile, className, level)
@@ -60,18 +60,14 @@ local function SetFriend(list, name, classFile, className, level)
 	list[name] = friend
 end
 
-local function RefreshCharacterFriends()
-	local info, candidate, englishClass
+local function AddCharacterFriends(list, includeOffline)
+	local info
 
 	for index = 1, C_FriendList.GetNumFriends() or 0 do
 		info = C_FriendList.GetFriendInfoByIndex(index)
 
-		if info and info.connected then
-			candidate, englishClass = IsCandidate(info)
-
-			if candidate then
-				SetFriend(friends, info.name, englishClass, info.className, info.level)
-			end
+		if info and (info.connected or includeOffline) and IsCandidate(info) then
+			SetFriend(list, info.name, select(2, GetPlayerInfoByGUID(info.guid)), info.className, info.level)
 		end
 	end
 end
@@ -115,7 +111,7 @@ function ns:RefreshFriends()
 	friends, previous = previous, friends
 	wipe(friends)
 
-	RefreshCharacterFriends()
+	AddCharacterFriends(friends)
 	AddBattleNetFriends(friends)
 
 	for name in next, friends do
@@ -142,25 +138,21 @@ end
 function ns:GetBlockCandidates()
 	local names = {}
 	local candidates = {}
-	local info
 
 	AddBattleNetFriends(names)
-
-	for index = 1, C_FriendList.GetNumFriends() or 0 do
-		info = C_FriendList.GetFriendInfoByIndex(index)
-
-		if IsCandidate(info) then
-			names[info.name] = true
-		end
-	end
+	AddCharacterFriends(names, true)
 
 	for name in next, names do
 		candidates[#candidates + 1] = {value = name, label = name}
 	end
 
-	table.sort(candidates, function(a, b) return a.value < b.value end)
+	table.sort(candidates, ns.SortByLabel)
 
 	return candidates
+end
+
+function ns.SortByLabel(a, b)
+	return a.label < b.label
 end
 
 function ns:GetFriend(name)
@@ -185,15 +177,8 @@ function ns:UnblockFriend(name)
 	ns:RefreshFriends()
 end
 
-function ns:OnLoad()
-	if not WhereAreMyFriendsDB then
-		_G.WhereAreMyFriendsDB = {}
-	end
-
-	WhereAreMyFriendsDB.blocked = WhereAreMyFriendsDB.blocked or {}
-end
-
 function ns:OnLogin()
+	WhereAreMyFriendsDB.blocked = WhereAreMyFriendsDB.blocked or {}
 	playerFaction = UnitFactionGroup("player")
 	ns.guildMapLoaded = C_AddOns.IsAddOnLoaded("GuildMap")
 
@@ -206,21 +191,10 @@ function ns:OnLogin()
 	ns:RefreshFriends()
 end
 
-function ns:FRIENDLIST_UPDATE()
-	ns:RefreshFriends()
-end
-
-function ns:BN_FRIEND_INFO_CHANGED()
-	ns:RefreshFriends()
-end
-
-function ns:BN_FRIEND_ACCOUNT_ONLINE()
-	ns:RefreshFriends()
-end
-
-function ns:BN_FRIEND_ACCOUNT_OFFLINE()
-	ns:RefreshFriends()
-end
+ns.FRIENDLIST_UPDATE = ns.RefreshFriends
+ns.BN_FRIEND_INFO_CHANGED = ns.RefreshFriends
+ns.BN_FRIEND_ACCOUNT_ONLINE = ns.RefreshFriends
+ns.BN_FRIEND_ACCOUNT_OFFLINE = ns.RefreshFriends
 
 function ns:PLAYER_ENTERING_WORLD()
 	if ns:IsPaused() and not IsRestricted() then

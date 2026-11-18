@@ -12,7 +12,7 @@ local function GetBlockedEntries()
 		entries[#entries + 1] = {key = name, label = name}
 	end
 
-	table.sort(entries, function(a, b) return a.key < b.key end)
+	table.sort(entries, ns.SortByLabel)
 
 	return entries
 end
@@ -28,9 +28,9 @@ local function Unblock(name)
 end
 
 local function UnblockAll()
-	for name in next, WhereAreMyFriendsDB.blocked do
-		Unblock(name)
-	end
+	wipe(WhereAreMyFriendsDB.blocked)
+	ns:RefreshFriends()
+	blockedList:SetEntries(GetBlockedEntries())
 end
 
 ns:RegisterSettings("WhereAreMyFriendsDB", {
@@ -77,8 +77,7 @@ ns:RegisterSettings("WhereAreMyFriendsDB", {
 		createControl = function(row)
 			local dropdown = ns:CreateDropdown(row, ns.GetBlockCandidates, nop, Block)
 			dropdown.Dropdown:SetDefaultText(NONE)
-			dropdown.IncrementButton:Hide()
-			dropdown.DecrementButton:Hide()
+			dropdown:HideSteppers()
 			return dropdown
 		end,
 	},
