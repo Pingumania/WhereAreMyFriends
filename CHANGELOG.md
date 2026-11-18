@@ -1,3 +1,12 @@
+### v5
+
+* Friends show up more reliably after logging in
+* Pins update right away when a friend joins or leaves your group
+* Battle.net friends on another ruleset or region are skipped
+* Blocked friends no longer send you their position
+
+*****
+
 ### v4
 
 * Friends reliably reappear after dungeons and loading screens
