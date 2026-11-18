@@ -5,7 +5,6 @@ local HBD = LibStub("HereBeDragons-2.0")
 
 local PREFIX = "WAMF"
 local TICK_INTERVAL = 2
-local HEARTBEAT_TICKS = 15
 local HELLO = "hello"
 local ACK = "ack"
 local GONE = "gone"
@@ -13,8 +12,7 @@ local HIDE = "hide"
 
 local peers = {}
 local ticker
-local restricted
-local ticks = 0
+local paused
 local lastMessage
 
 local function Serialize(instanceId, x, y)
@@ -35,7 +33,7 @@ local function Deserialize(message)
 end
 
 local function Send(message, name)
-	if restricted then
+	if paused then
 		return
 	end
 
@@ -60,6 +58,10 @@ function ns:RemovePeer(name)
 	peers[name] = nil
 
 	ns:RemovePin(name)
+
+	if not next(peers) then
+		ns:StopBroadcasting()
+	end
 end
 
 function ns:Ping(name)
@@ -73,10 +75,8 @@ end
 function ns:Broadcast()
 	local x, y, instanceId = HBD:GetPlayerWorldPosition()
 	local message = Serialize(instanceId, x, y)
-	ticks = ticks + 1
-	local heartbeat = ticks >= HEARTBEAT_TICKS
 
-	if message == lastMessage and not heartbeat then
+	if message == lastMessage then
 		return
 	end
 
@@ -85,15 +85,10 @@ function ns:Broadcast()
 	for name in next, peers do
 		Send(message, name)
 	end
-
-	if heartbeat then
-		ticks = 0
-		ns:PingFriends()
-	end
 end
 
 function ns:StartBroadcasting()
-	if ticker or restricted then
+	if ticker or paused or not next(peers) then
 		return
 	end
 
@@ -115,31 +110,30 @@ function ns:PauseBroadcasting()
 		Send(GONE, name)
 	end
 
+	wipe(peers)
+	paused = true
+
 	ns:StopBroadcasting()
 end
 
-function ns:SetRestricted(value)
-	if value then
-		ns:PauseBroadcasting()
-		ns:RemoveAllPins()
-	end
+function ns:IsPaused()
+	return paused
+end
 
-	restricted = value
+function ns:ResumeBroadcasting()
+	paused = nil
 
-	if not value then
-		ns:StartBroadcasting()
-		ns:PingFriends()
-	end
+	ns:StartBroadcasting()
 end
 
 function ns:OnCommReceived(prefix, message, distribution, sender)
-	if prefix ~= PREFIX or distribution ~= "WHISPER" then
+	if prefix ~= PREFIX or distribution ~= "WHISPER" or paused then
 		return
 	end
 
 	sender = Ambiguate(sender, "none")
 
-	if restricted or not ns:IsFriend(sender) then
+	if not ns:IsFriend(sender) then
 		return
 	end
 
@@ -150,19 +144,13 @@ function ns:OnCommReceived(prefix, message, distribution, sender)
 		AddPeer(sender)
 	elseif message == GONE then
 		ns:RemovePeer(sender)
+	elseif message == HIDE then
+		ns:RemovePin(sender)
 	else
-		if not ns:IsPeer(sender) then
-			AddPeer(sender)
-		end
+		local instanceId, x, y = Deserialize(message)
 
-		if message == HIDE then
-			ns:RemovePin(sender)
-		else
-			local instanceId, x, y = Deserialize(message)
-
-			if instanceId then
-				ns:UpdatePin(sender, instanceId, x, y)
-			end
+		if instanceId then
+			ns:UpdatePin(sender, instanceId, x, y)
 		end
 	end
 end
