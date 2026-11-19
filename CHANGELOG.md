@@ -1,3 +1,9 @@
+### v6
+
+* Friends reconnect after a loading screen if the first attempt failed
+
+*****
+
 ### v5
 
 * Friends show up more reliably after logging in
