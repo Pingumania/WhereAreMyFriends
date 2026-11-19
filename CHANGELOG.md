@@ -1,3 +1,9 @@
+### v7
+
+* Friends inside a dungeon no longer leave a pin at the entrance
+
+*****
+
 ### v6
 
 * Friends reconnect after a loading screen if the first attempt failed
