@@ -199,7 +199,7 @@ ns.BN_FRIEND_ACCOUNT_ONLINE = ns.RefreshFriends
 ns.BN_FRIEND_ACCOUNT_OFFLINE = ns.RefreshFriends
 
 function ns:PLAYER_ENTERING_WORLD()
-	if ns:IsPaused() and not IsRestricted() then
+	if not IsRestricted() then
 		ns:ResumeBroadcasting()
 		ns:PingFriends()
 	end

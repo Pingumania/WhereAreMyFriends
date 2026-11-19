@@ -116,10 +116,6 @@ function ns:PauseBroadcasting()
 	ns:StopBroadcasting()
 end
 
-function ns:IsPaused()
-	return paused
-end
-
 function ns:ResumeBroadcasting()
 	paused = nil
 
