@@ -107,7 +107,7 @@ end
 
 function ns:PauseBroadcasting()
 	for name in next, peers do
-		Send(GONE, name)
+		C_ChatInfo.SendAddonMessage(PREFIX, GONE, "WHISPER", name)
 	end
 
 	wipe(peers)
