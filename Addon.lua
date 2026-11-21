@@ -11,7 +11,6 @@ local friends = {}
 local previous = {}
 local raceFactions = {}
 local playerFaction
-local playerRuleset
 
 local function CacheRaceFactions()
 	local race, faction
@@ -73,17 +72,9 @@ local function AddCharacterFriends(list, includeOffline)
 	end
 end
 
-local function GetGameAccountName(game)
-	if RegionalUniqueNamesEnabled() or not game.realmName then
-		return game.characterName
-	end
-
-	return Ambiguate(game.characterName .. "-" .. game.realmName:gsub("%s", ""), "none")
-end
-
 local function IsReachable(game)
 	return game and game.isOnline and game.isInCurrentRegion and game.characterName and game.wowProjectID == WOW_PROJECT_ID
-		and game.factionName == playerFaction and game.realmName and game.realmName:match("%a+$") == playerRuleset
+		and game.factionName == playerFaction
 end
 
 local function AddBattleNetFriends(list)
@@ -94,7 +85,7 @@ local function AddBattleNetFriends(list)
 			game = C_BattleNet.GetFriendGameAccountInfo(index, gameIndex)
 
 			if IsReachable(game) then
-				name = GetGameAccountName(game)
+				name = game.characterName
 
 				if not WhereAreMyFriendsDB.blocked[name] then
 					SetFriend(list, name, game.classFilename, game.className, game.characterLevel)
@@ -181,7 +172,6 @@ end
 function ns:OnLogin()
 	WhereAreMyFriendsDB.blocked = WhereAreMyFriendsDB.blocked or {}
 	playerFaction = UnitFactionGroup("player")
-	playerRuleset = GetRealmName():match("%a+$")
 	ns.guildMapLoaded = C_AddOns.IsAddOnLoaded("GuildMap")
 
 	CacheRaceFactions()

@@ -1,3 +1,9 @@
+### v8
+
+* Fix Battle.net friends not being found in WoW Forever
+
+*****
+
 ### v7
 
 * Friends inside a dungeon no longer leave a pin at the entrance
